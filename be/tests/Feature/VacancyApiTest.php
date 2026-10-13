@@ -186,6 +186,52 @@ test('POST /api/vacancies returns 422 when salary_max is below salary_min', func
         ->assertJsonValidationErrors('salary_max');
 });
 
+test('GET /api/vacancies?search= returns all vacancies when search is empty', function () {
+    Vacancy::factory()->count(2)->create();
+
+    $response = $this->getJson('/api/vacancies?search=');
+
+    $response->assertOk()->assertJsonCount(2, 'data');
+});
+
+test('GET /api/vacancies?search= filters by title case-insensitively', function () {
+    Vacancy::factory()->create(['title' => 'Android Developer']);
+    Vacancy::factory()->create(['title' => 'iOS Developer']);
+    Vacancy::factory()->create(['title' => 'Product Manager']);
+
+    $response = $this->getJson('/api/vacancies?search=developer');
+
+    $titles = $response
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->json('data');
+
+    $titles = array_column($titles, 'title');
+    sort($titles);
+
+    expect($titles)->toBe(['Android Developer', 'iOS Developer']);
+});
+
+test('GET /api/vacancies?search= performs partial title matching', function () {
+    Vacancy::factory()->create(['title' => 'Android Developer']);
+    Vacancy::factory()->create(['title' => 'iOS Developer']);
+
+    $response = $this->getJson('/api/vacancies?search=Android');
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.title', 'Android Developer');
+});
+
+test('GET /api/vacancies?search= returns an empty collection when no match', function () {
+    Vacancy::factory()->create(['title' => 'Android Developer']);
+
+    $response = $this->getJson('/api/vacancies?search=nonexistent');
+
+    $response->assertOk()->assertJson(['data' => []]);
+});
+
 function validPayload(array $overrides = []): array
 {
     return array_merge([

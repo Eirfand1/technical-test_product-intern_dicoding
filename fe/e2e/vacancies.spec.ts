@@ -70,6 +70,12 @@ test.describe('Dicoding Jobs E2E', () => {
 
     // Tag HTML mentah tidak boleh muncul sebagai teks
     await expect(page.locator('.job-description')).not.toContainText('&lt;h2&gt;')
+
+    // Field detail lain (posisi, lokasi, tipe) kini tampil
+    const detail = page.locator('article')
+    await expect(detail.getByText('Informasi Lowongan')).toBeVisible()
+    await expect(detail.getByText('Lokasi')).toBeVisible()
+    await expect(detail.getByText('Tipe pekerjaan')).toBeVisible()
   })
 
   test('user can create a new vacancy from dashboard', async ({ page }) => {

@@ -69,6 +69,7 @@ export default function DashboardPage() {
                 currentPage={meta.current_page}
                 lastPage={meta.last_page}
                 total={meta.total}
+                perPage={PER_PAGE}
                 onChange={setPage}
               />
             )}

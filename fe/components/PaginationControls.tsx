@@ -6,6 +6,7 @@ type PaginationControlsProps = {
   currentPage: number
   lastPage: number
   total: number
+  perPage: number
   onChange: (page: number) => void
 }
 
@@ -13,18 +14,22 @@ export default function PaginationControls({
   currentPage,
   lastPage,
   total,
+  perPage,
   onChange,
 }: PaginationControlsProps) {
   if (lastPage <= 1) {
     return null
   }
 
+  const from = (currentPage - 1) * perPage + 1
+  const to = Math.min(currentPage * perPage, total)
+
   const pageNumbers = Array.from({ length: lastPage }, (_, i) => i + 1)
 
   return (
     <nav aria-label="Pagination" className="mt-6 flex flex-col items-center gap-2">
       <p className="text-xs text-gray-500">
-        Menampilkan {total} lowongan
+        Menampilkan {from}–{to} dari {total} lowongan
       </p>
       <div className="flex items-center gap-1">
         <button

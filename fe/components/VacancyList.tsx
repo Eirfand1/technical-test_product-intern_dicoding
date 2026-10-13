@@ -54,6 +54,7 @@ export default function VacancyList({ filters, page, perPage, onPaginate }: Vaca
           currentPage={meta.current_page}
           lastPage={meta.last_page}
           total={meta.total}
+          perPage={meta.per_page}
           onChange={onPaginate}
         />
       )}

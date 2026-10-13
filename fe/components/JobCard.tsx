@@ -82,7 +82,7 @@ export default function JobCard({ vacancy }: { vacancy: Vacancy }) {
       </div>
 
       {/* Tanggal: ke bawah penuh di mobile, kanan di desktop */}
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500 sm:mt-0 sm:border-0 sm:pt-0">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500">
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3.5 w-3.5" />
           Dibuat {formatDate(vacancy.created_at)}

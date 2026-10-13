@@ -40,8 +40,28 @@ class VacancyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Vacancy $vacancy)
+    public function show(Vacancy      $vacancy)
     {
         return new VacancyResource($vacancy);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(StoreVacancyRequest $request, Vacancy $vacancy)
+    {
+        $vacancy->update($request->validated());
+
+        return new VacancyResource($vacancy);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Vacancy $vacancy)
+    {
+        $vacancy->delete();
+
+        return response()->noContent();
     }
 }

@@ -232,6 +232,58 @@ test('GET /api/vacancies?search= returns an empty collection when no match', fun
     $response->assertOk()->assertJson(['data' => []]);
 });
 
+test('PUT /api/vacancies/{id} updates a vacancy with valid data', function () {
+    $vacancy = Vacancy::factory()->create([
+        'title' => 'Old Title',
+        'company_name' => 'Old Corp',
+    ]);
+
+    $payload = validPayload([
+        'title' => 'Updated Title',
+        'company_name' => 'Updated Corp',
+        'company_sector' => 'Finance',
+        'company_size' => '100-500 Karyawan',
+    ]);
+
+    $response = $this->putJson("/api/vacancies/{$vacancy->id}", $payload);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('data.title', 'Updated Title')
+        ->assertJsonPath('data.company_name', 'Updated Corp');
+
+    $this->assertDatabaseHas('vacancies', [
+        'id' => $vacancy->id,
+        'title' => 'Updated Title',
+        'company_name' => 'Updated Corp',
+        'company_sector' => 'Finance',
+        'company_size' => '100-500 Karyawan',
+    ]);
+});
+
+test('PUT /api/vacancies/{id} returns 404 for a missing vacancy', function () {
+    $payload = validPayload();
+
+    $response = $this->putJson('/api/vacancies/999999', $payload);
+
+    $response->assertNotFound();
+});
+
+test('DELETE /api/vacancies/{id} removes a vacancy', function () {
+    $vacancy = Vacancy::factory()->create();
+
+    $response = $this->deleteJson("/api/vacancies/{$vacancy->id}");
+
+    $response->assertNoContent();
+    $this->assertDatabaseMissing('vacancies', ['id' => $vacancy->id]);
+});
+
+test('DELETE /api/vacancies/{id} returns 404 for a missing vacancy', function () {
+    $response = $this->deleteJson('/api/vacancies/999999');
+
+    $response->assertNotFound();
+});
+
 function validPayload(array $overrides = []): array
 {
     return array_merge([

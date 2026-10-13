@@ -73,3 +73,136 @@ test('GET /api/vacancies/{id} returns 404 for a missing vacancy', function () {
 
     $response->assertNotFound();
 });
+
+test('POST /api/vacancies creates a vacancy with valid data', function () {
+    $payload = [
+        'title' => 'Senior Backend Engineer',
+        'position' => 'Engineering',
+        'job_type' => 'full_time',
+        'candidates_needed' => 2,
+        'active_until' => '2030-12-31',
+        'location' => 'Jakarta',
+        'is_remote' => false,
+        'description' => '<h2>Job Description</h2><p>Bangun backend.</p>',
+        'salary_min' => 15000000,
+        'salary_max' => 25000000,
+        'show_salary' => true,
+        'min_experience' => '4_5',
+        'company_name' => 'Acme Corp',
+        'company_sector' => 'Technology',
+        'company_size' => '50-100 Karyawan',
+    ];
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertCreated()
+        ->assertJsonStructure(['data' => ['id', 'title', 'job_type', 'company_name', 'company_sector', 'company_size']])
+        ->assertJsonPath('data.title', 'Senior Backend Engineer')
+        ->assertJsonPath('data.job_type', 'full_time')
+        ->assertJsonPath('data.company_name', 'Acme Corp');
+
+    $this->assertDatabaseHas('vacancies', [
+        'title' => 'Senior Backend Engineer',
+        'company_name' => 'Acme Corp',
+        'job_type' => 'full_time',
+    ]);
+});
+
+test('POST /api/vacancies accepts a null salary_max', function () {
+    $payload = validPayload([
+        'title' => 'Intern',
+        'job_type' => 'intern',
+        'min_experience' => 'lt_1',
+        'salary_min' => 3000000,
+        'salary_max' => null,
+    ]);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response->assertCreated();
+    $this->assertDatabaseHas('vacancies', [
+        'title' => 'Intern',
+        'salary_max' => null,
+    ]);
+});
+
+test('POST /api/vacancies returns 422 when required fields are missing', function () {
+    $response = $this->postJson('/api/vacancies', []);
+
+    $response->assertStatus(422);
+});
+
+test('POST /api/vacancies returns 422 for an invalid job_type enum', function () {
+    $payload = validPayload(['job_type' => 'invalid_enum']);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('job_type');
+});
+
+test('POST /api/vacancies returns 422 for an invalid min_experience enum', function () {
+    $payload = validPayload(['min_experience' => 'invalid_enum']);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('min_experience');
+});
+
+test('POST /api/vacancies returns 422 when active_until is in the past', function () {
+    $payload = validPayload(['active_until' => '2000-01-01']);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('active_until');
+});
+
+test('POST /api/vacancies returns 422 when candidates_needed is below minimum', function () {
+    $payload = validPayload(['candidates_needed' => 0]);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('candidates_needed');
+});
+
+test('POST /api/vacancies returns 422 when salary_max is below salary_min', function () {
+    $payload = validPayload([
+        'salary_min' => 20000000,
+        'salary_max' => 10000000,
+    ]);
+
+    $response = $this->postJson('/api/vacancies', $payload);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('salary_max');
+});
+
+function validPayload(array $overrides = []): array
+{
+    return array_merge([
+        'title' => 'Test Role',
+        'position' => 'Engineering',
+        'job_type' => 'full_time',
+        'candidates_needed' => 1,
+        'active_until' => '2030-12-31',
+        'location' => 'Jakarta',
+        'is_remote' => false,
+        'description' => '<p>Test</p>',
+        'salary_min' => 15000000,
+        'salary_max' => 20000000,
+        'show_salary' => true,
+        'min_experience' => '1_3',
+        'company_name' => 'Acme Corp',
+        'company_sector' => 'Technology',
+        'company_size' => '50-100 Karyawan',
+    ], $overrides);
+}

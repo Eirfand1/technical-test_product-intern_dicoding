@@ -177,6 +177,12 @@ test.describe('Dicoding Jobs E2E', () => {
     await expect(page.getByText('Edited Unique Vacancy')).toBeVisible()
     await expect(page.getByText(/berhasil diperbarui/)).toBeVisible()
 
+    // Deskripsi tetap tersimpan sebagai HTML bersih (bukan entity-escaped)
+    const after = await request.get(`http://localhost:8000/api/vacancies/${data.id}`)
+    const afterBody = await after.json()
+    expect(afterBody.data.description).toContain('<p>')
+    expect(afterBody.data.description).not.toContain('&lt;')
+
     await request.delete(`http://localhost:8000/api/vacancies/${data.id}`) // cleanup
   })
 

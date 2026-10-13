@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createVacancy, updateVacancy, ApiValidationError, type VacancyPayload } from '@/lib/api'
 import type { Vacancy } from '@/lib/api'
+import { decodeHtmlEntities } from '@/lib/html'
 import { useToast } from '@/components/Toast'
 import SimpleWysiwyg from 'react-simple-wysiwyg'
 
@@ -51,7 +52,7 @@ function toFormState(vacancy?: Vacancy): FormState {
       : '',
     location: vacancy?.location ?? '',
     is_remote: vacancy?.is_remote ?? false,
-    description: vacancy?.description ?? '',
+    description: vacancy ? decodeHtmlEntities(vacancy.description ?? '') : '',
     salary_min: vacancy?.salary_min ?? 0,
     salary_max: vacancy?.salary_max ?? null,
     show_salary: vacancy?.show_salary ?? false,

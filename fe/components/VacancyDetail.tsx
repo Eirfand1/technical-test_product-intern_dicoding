@@ -3,16 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { fetchVacancy } from '@/lib/api'
-
-/**
- * Decode HTML entities (e.g. &lt;h2&gt; -> <h2>) so that descriptions stored
- * as escaped text still render as real HTML after sanitization.
- */
-function decodeHtmlEntities(html: string): string {
-  const el = document.createElement('textarea')
-  el.innerHTML = html
-  return el.value
-}
+import { decodeHtmlEntities } from '@/lib/html'
 
 export default function VacancyDetail({ id }: { id: number | string }) {
   const { data, isLoading, isError } = useQuery({
@@ -34,8 +25,7 @@ export default function VacancyDetail({ id }: { id: number | string }) {
         return
       }
 
-      const decoded = decodeHtmlEntities(data.description)
-      const clean = DOMPurify.sanitize(decoded, {
+      const clean = DOMPurify.sanitize(decodeHtmlEntities(data.description), {
         USE_PROFILES: { html: true },
       })
 

@@ -13,8 +13,8 @@ Full-stack job vacancy system for the Dicoding technical exercise. Recruiters ca
 ### Architecture
 
 ```
-be/    Laravel REST API  →  http://localhost:8000/api/vacancies
-fe/    Next.js frontend  →  http://localhost:3000
+be/    Laravel REST API    http://localhost:8000/api/vacancies
+fe/    Next.js frontend    http://localhost:3000
 ```
 
 The frontend reads the API base URL from `NEXT_PUBLIC_API_URL` (`.env.local`), never hardcoded.

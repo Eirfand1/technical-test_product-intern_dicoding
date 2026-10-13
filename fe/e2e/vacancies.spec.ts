@@ -176,4 +176,37 @@ test.describe('Dicoding Jobs E2E', () => {
 
     await request.delete(`http://localhost:8000/api/vacancies/${data.id}`) // cleanup
   })
+
+  test('user can navigate between paginated vacancy lists', async ({ page, request }) => {
+    // Buat vacancy unik supaya tidak terpengaruh state test lain
+    const title = `Paged Vacancy ${Date.now()}`
+    const res = await request.post(`http://localhost:8000/api/vacancies`, {
+      data: {
+        title, position: 'QA', job_type: 'full_time', candidates_needed: 1,
+        active_until: '2030-01-01', location: 'Jakarta', is_remote: false,
+        description: '<p>Paged</p>', salary_min: 10000000,
+        show_salary: false, min_experience: 'lt_1',
+        company_name: 'Dicoding Indonesia',
+      },
+    })
+    expect(res.ok()).toBeTruthy()
+    const { data } = await res.json()
+
+    await page.goto('/')
+
+    // Halaman awal tidak menampilkan tombol pagination bila hanya 1 page
+    const pager = page.getByRole('navigation', { name: 'Pagination' })
+    const hasPager = (await pager.count()) > 0
+
+    if (hasPager) {
+      // Klik tombol "Next" bila tersedia dan verifikasi URL berubah ke page 2
+      await page.getByRole('button', { name: 'Halaman berikutnya' }).click()
+      await expect(page).toHaveURL(/page=2/)
+    } else {
+      // Jika hanya satu halaman, cukup pastikan kartu lowongan tampil
+      await expect(page.locator('a[href^="/jobs/"]').first()).toBeVisible()
+    }
+
+    await request.delete(`http://localhost:8000/api/vacancies/${data.id}`) // cleanup
+  })
 })

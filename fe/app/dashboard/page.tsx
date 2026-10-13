@@ -1,26 +1,35 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchVacancies } from '@/lib/api'
 import DashboardVacancyCard from '@/components/DashboardVacancyCard'
+import PaginationControls from '@/components/PaginationControls'
+
+const PER_PAGE = 5
 
 export default function DashboardPage() {
-  const { data: vacancies, isLoading, isError } = useQuery({
-    queryKey: ['vacancies', 'dashboard'],
-    queryFn: () => fetchVacancies(),
+  const [page, setPage] = useState(1)
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['vacancies', 'dashboard', page],
+    queryFn: () => fetchVacancies({}, page, PER_PAGE),
   })
+
+  const vacancies = data?.data ?? []
+  const meta = data?.meta
 
   return (
     <div className="flex gap-6">
       {/* Sidebar */}
       <aside className="w-52 shrink-0">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="font-bold text-lg mb-4">Jobs</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <h2 className="mb-4 text-lg font-bold">Jobs</h2>
           <ul className="space-y-1">
             <li>
               <a
                 href="/dashboard"
-                className="block px-3 py-2 rounded  bg-blue-50 font-medium"
+                className="block rounded bg-blue-50 px-3 py-2 font-medium"
               >
                 Lowongan Saya
               </a>
@@ -31,7 +40,7 @@ export default function DashboardPage() {
 
       {/* Main content */}
       <div className="flex-1">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Lowongan Saya</h1>
           <a
             href="/dashboard/jobs/create"
@@ -42,18 +51,26 @@ export default function DashboardPage() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8">Memuat...</div>
+          <div className="py-8 text-center">Memuat...</div>
         ) : isError ? (
-          <div className="text-center py-8 text-red-500">
+          <div className="py-8 text-center text-red-500">
             Gagal memuat lowongan. Coba lagi.
           </div>
         ) : (
           <div className="space-y-3">
-            {(vacancies ?? []).map((v) => (
+            {vacancies.map((v) => (
               <DashboardVacancyCard key={v.id} vacancy={v} />
             ))}
-            {(vacancies ?? []).length === 0 && (
+            {vacancies.length === 0 && (
               <p className="text-gray-500">Belum ada lowongan yang dibuat.</p>
+            )}
+            {meta && (
+              <PaginationControls
+                currentPage={meta.current_page}
+                lastPage={meta.last_page}
+                total={meta.total}
+                onChange={setPage}
+              />
             )}
           </div>
         )}

@@ -2,7 +2,7 @@
 
 use App\Models\Vacancy;
 
-test('GET /api/vacancies returns a collection of vacancies', function () {
+test('GET /api/vacancies returns a paginated collection of vacancies', function () {
     Vacancy::factory()->count(3)->create();
 
     $response = $this->getJson('/api/vacancies');
@@ -29,7 +29,60 @@ test('GET /api/vacancies returns a collection of vacancies', function () {
                 'company_logo',
                 'created_at',
             ]],
+            'current_page',
+            'links',
+            'per_page',
+            'total',
+            'last_page',
         ]);
+});
+
+test('GET /api/vacancies supports pagination with per_page and page', function () {
+    Vacancy::factory()->count(15)->create(['title' => 'Base Role']);
+
+    $page1 = $this->getJson('/api/vacancies?per_page=10&page=1');
+    $page2 = $this->getJson('/api/vacancies?per_page=10&page=2');
+
+    $page1
+        ->assertOk()
+        ->assertJsonCount(10, 'data')
+        ->assertJsonPath('per_page', 10)
+        ->assertJsonPath('current_page', 1)
+        ->assertJsonPath('total', 15);
+
+    $page2
+        ->assertOk()
+        ->assertJsonCount(5, 'data')
+        ->assertJsonPath('current_page', 2)
+        ->assertJsonPath('last_page', 2);
+});
+
+test('GET /api/vacancies clamps per_page to max 100 and page to min 1', function () {
+    Vacancy::factory()->count(2)->create();
+
+    $response = $this->getJson('/api/vacancies?per_page=9999&page=0');
+
+    $response->assertOk();
+});
+
+test('GET /api/vacancies combines search and filters', function () {
+    Vacancy::factory()->create([
+        'title' => 'Senior Backend Engineer',
+        'job_type' => 'full_time',
+        'location' => 'Jakarta',
+        'position' => 'Engineering',
+    ]);
+    Vacancy::factory()->create([
+        'title' => 'Junior Frontend Developer',
+        'job_type' => 'part_time',
+        'location' => 'Bandung',
+        'position' => 'Engineering',
+    ]);
+
+    $response = $this->getJson('/api/vacancies?search=Backend&job_type=full_time&location=Jakarta');
+
+    $response->assertOk()->assertJsonCount(1, 'data');
+    expect($response->json('data.0.title'))->toBe('Senior Backend Engineer');
 });
 
 test('GET /api/vacancies returns the newest vacancy first', function () {

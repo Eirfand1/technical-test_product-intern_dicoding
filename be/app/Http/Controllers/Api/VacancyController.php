@@ -16,6 +16,15 @@ class VacancyController extends Controller
      */
     public function index(Request $request)
     {
+        $perPage = (int) $request->query('per_page', 10);
+        $perPage = max(1, min(100, $perPage));
+        if ($perPage === 0) {
+            $perPage = 10;
+        }
+
+        $page = (int) $request->query('page', 1);
+        $page = max(1, $page);
+
         $vacancies = Vacancy::query()
             ->when($request->query('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%");
@@ -30,9 +39,9 @@ class VacancyController extends Controller
                 $query->where('position', $position);
             })
             ->latest()
-            ->get();
+            ->paginate($perPage, ['*'], 'page', $page);
 
-        return VacancyResource::collection($vacancies);
+        return VacancyResource::collection($vacancies)->withQueryString();
     }
 
     /**

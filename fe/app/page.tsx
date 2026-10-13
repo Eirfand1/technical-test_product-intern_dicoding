@@ -16,6 +16,12 @@ function VacanciesView() {
   const [jobType, setJobType] = useState(searchParams.get('job_type') ?? '')
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
   const [position, setPosition] = useState(searchParams.get('position') ?? '')
+  const [page, setPage] = useState(() => {
+    const raw = searchParams.get('page')
+    const parsed = raw ? parseInt(raw, 10) : 1
+    return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1
+  })
+  const [perPage] = useState(10)
 
   const filters: VacancyFilters = {
     search: input,
@@ -26,33 +32,46 @@ function VacanciesView() {
 
   const hasActiveFilters = Boolean(input || jobType || location || position)
 
-  function updateUrl(nextFilters: Partial<VacancyFilters>) {
-    const params = new URLSearchParams()
-    for (const [key, value] of Object.entries(nextFilters)) {
-      if (value) params.set(key, value)
+  function updateUrl(next: { filters?: Partial<VacancyFilters>; page?: number }) {
+    const mergedFilters: Partial<VacancyFilters> = next.filters ?? filters
+    const nextFilters = {
+      search: mergedFilters.search ?? '',
+      job_type: mergedFilters.job_type ?? '',
+      location: mergedFilters.location ?? '',
+      position: mergedFilters.position ?? '',
     }
+    const nextPage = next.page ?? 1
+
+    const params = new URLSearchParams()
+    if (nextFilters.search) params.set('search', nextFilters.search)
+    if (nextFilters.job_type) params.set('job_type', nextFilters.job_type)
+    if (nextFilters.location) params.set('location', nextFilters.location)
+    if (nextFilters.position) params.set('position', nextFilters.position)
+    if (nextPage > 1) params.set('page', String(nextPage))
+    params.set('per_page', String(perPage))
     const qs = params.toString()
     router.replace(qs ? `/?${qs}` : '/')
   }
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value)
-    updateUrl({ ...filters, search: e.target.value })
+    const value = e.target.value
+    setInput(value)
+    updateUrl({ filters: { ...filters, search: value }, page: 1 })
   }
 
   const onJobTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setJobType(e.target.value)
-    updateUrl({ ...filters, job_type: e.target.value })
+    updateUrl({ filters: { ...filters, job_type: e.target.value }, page: 1 })
   }
 
   const onLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLocation(e.target.value)
-    updateUrl({ ...filters, location: e.target.value })
+    updateUrl({ filters: { ...filters, location: e.target.value }, page: 1 })
   }
 
   const onPositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPosition(e.target.value)
-    updateUrl({ ...filters, position: e.target.value })
+    updateUrl({ filters: { ...filters, position: e.target.value }, page: 1 })
   }
 
   const clearAll = () => {
@@ -60,7 +79,13 @@ function VacanciesView() {
     setJobType('')
     setLocation('')
     setPosition('')
-    updateUrl({})
+    setPage(1)
+    updateUrl({ filters: {}, page: 1 })
+  }
+
+  const onPaginate = (nextPage: number) => {
+    setPage(nextPage)
+    updateUrl({ page: nextPage })
   }
 
   return (
@@ -145,7 +170,7 @@ function VacanciesView() {
       </div>
 
       <div className="mt-6">
-        <VacancyList filters={filters} />
+        <VacancyList filters={filters} page={page} perPage={perPage} onPaginate={onPaginate} />
       </div>
     </div>
   )

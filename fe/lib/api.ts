@@ -99,25 +99,68 @@ export type VacancyFilters = {
   position?: string
 }
 
-function toQueryString(filters: VacancyFilters): string {
+export type VacancyPageMeta = {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+  from: number | null
+  to: number | null
+}
+
+export type VacancyPage = {
+  data: Vacancy[]
+  meta: VacancyPageMeta
+  links: unknown[]
+}
+
+type RawVacanciesResponse = {
+  data: Vacancy[]
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+  from?: number | null
+  to?: number | null
+  links?: unknown[]
+}
+
+function toQueryString(filters: VacancyFilters, page = 1, perPage = 10): string {
   const params = new URLSearchParams()
 
   if (filters.search) params.set('search', filters.search)
   if (filters.job_type) params.set('job_type', filters.job_type)
   if (filters.location) params.set('location', filters.location)
   if (filters.position) params.set('position', filters.position)
+  params.set('per_page', String(perPage))
+  params.set('page', String(page))
 
   const qs = params.toString()
   return qs ? `?${qs}` : ''
 }
 
-export async function fetchVacancies(filters: VacancyFilters = {}): Promise<Vacancy[]> {
-  const query = toQueryString(filters)
+export async function fetchVacancies(
+  filters: VacancyFilters = {},
+  page = 1,
+  perPage = 10
+): Promise<VacancyPage> {
+  const query = toQueryString(filters, page, perPage)
   const response = await fetch(`${API_URL}/api/vacancies${query}`)
 
-  const body = await handleResponse<{ data: Vacancy[] }>(response)
+  const body = await handleResponse<RawVacanciesResponse>(response)
 
-  return body.data
+  return {
+    data: body.data,
+    meta: {
+      current_page: body.current_page,
+      last_page: body.last_page,
+      per_page: body.per_page,
+      total: body.total,
+      from: body.from ?? null,
+      to: body.to ?? null,
+    },
+    links: body.links ?? [],
+  }
 }
 
 export async function fetchVacancy(id: number | string): Promise<Vacancy> {

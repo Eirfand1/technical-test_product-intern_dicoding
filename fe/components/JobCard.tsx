@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Briefcase } from 'lucide-react'
+import { Briefcase, Clock, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import type { Vacancy } from '@/lib/api'
 
@@ -43,41 +42,54 @@ export default function JobCard({ vacancy }: { vacancy: Vacancy }) {
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
-      className="block w-full max-w-3xl rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
+      className="block w-full rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
     >
-      <div className="flex items-start gap-4">
+      {/* Header: logo + judul + meta (tumpuk di mobile) */}
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Logo perusahaan - fallback ke icon Briefcase jika tidak ada */}
         {showLogo ? (
           <img
             src={vacancy.company_logo!}
             alt={`${vacancy.company_name} logo`}
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg object-contain"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg object-contain sm:h-16 sm:w-16"
             onError={() => setLogoError(true)}
           />
         ) : (
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-            <Briefcase className="h-8 w-8 text-gray-600" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-100 sm:h-16 sm:w-16">
+            <Briefcase className="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
           </div>
         )}
 
-        <div className="flex-1">
-          <h2 className="text-lg font-bold text-gray-900">{vacancy.title}</h2>
-          <p className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-bold text-gray-900 sm:text-lg">{vacancy.title}</h2>
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
             {vacancy.company_name}
-            <span className="ml-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+            <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
               {jobType}
             </span>
           </p>
-          <p className="mt-1 flex items-center gap-4 text-sm text-gray-500">
-            <span>{vacancy.location}</span>
-            <span>{experience}</span>
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              {vacancy.location}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Briefcase className="h-3.5 w-3.5" />
+              {experience}
+            </span>
+          </div>
         </div>
+      </div>
 
-        <div className="text-right text-xs text-gray-500">
-          <p>Dibuat pada {formatDate(vacancy.created_at)}</p>
-          <p>Lamar sebelum {formatDate(vacancy.active_until)}</p>
-        </div>
+      {/* Tanggal: ke bawah penuh di mobile, kanan di desktop */}
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500 sm:mt-0 sm:border-0 sm:pt-0">
+        <span className="inline-flex items-center gap-1">
+          <Clock className="h-3.5 w-3.5" />
+          Dibuat {formatDate(vacancy.created_at)}
+        </span>
+        <span className="text-right">
+          Lamar sebelum {formatDate(vacancy.active_until)}
+        </span>
       </div>
     </Link>
   )

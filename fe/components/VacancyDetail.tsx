@@ -4,6 +4,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { fetchVacancy } from '@/lib/api'
 
+/**
+ * Decode HTML entities (e.g. &lt;h2&gt; -> <h2>) so that descriptions stored
+ * as escaped text still render as real HTML after sanitization.
+ */
+function decodeHtmlEntities(html: string): string {
+  const el = document.createElement('textarea')
+  el.innerHTML = html
+  return el.value
+}
+
 export default function VacancyDetail({ id }: { id: number | string }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['vacancy', id],
@@ -24,7 +34,8 @@ export default function VacancyDetail({ id }: { id: number | string }) {
         return
       }
 
-      const clean = DOMPurify.sanitize(data.description, {
+      const decoded = decodeHtmlEntities(data.description)
+      const clean = DOMPurify.sanitize(decoded, {
         USE_PROFILES: { html: true },
       })
 
@@ -37,20 +48,20 @@ export default function VacancyDetail({ id }: { id: number | string }) {
   }, [data?.description])
 
   if (isLoading) {
-    return <div className="text-center py-8">Memuat detail...</div>
+    return <div className="py-8 text-center">Memuat detail...</div>
   }
 
   if (isError || !data) {
     return (
-      <div className="text-center py-8 text-red-500">Lowongan tidak ditemukan</div>
+      <div className="py-8 text-center text-red-500">Lowongan tidak ditemukan</div>
     )
   }
 
   return (
-    <article className="bg-white p-6 rounded-lg shadow">
-      <h1 className="text-3xl font-bold">{data.title}</h1>
-      <p className="text-gray-600 mt-2">{data.company_name}</p>
-      <div ref={containerRef} className="mt-4 prose" aria-label="Deskripsi lowongan" />
+    <article className="rounded-lg bg-white p-4 shadow sm:p-6">
+      <h1 className="text-2xl font-bold sm:text-3xl">{data.title}</h1>
+      <p className="mt-2 text-gray-600">{data.company_name}</p>
+      <div ref={containerRef} className="job-description mt-4" aria-label="Deskripsi lowongan" />
     </article>
   )
 }

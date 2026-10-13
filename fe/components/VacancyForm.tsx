@@ -144,7 +144,7 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
 
         <div>
           <label className="block font-medium">Tipe pekerjaan</label>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3 sm:gap-4">
             {JOB_TYPES.map((t) => (
               <label key={t.value} className="flex items-center gap-1">
                 <input
@@ -223,7 +223,7 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
 
         <fieldset className="space-y-2">
           <legend className="block font-medium">Rentang gaji per bulan</legend>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <input
                 type="number"
@@ -307,18 +307,18 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
           </div>
         </fieldset>
 
-        <div className="flex gap-4 pt-4 border-t">
+        <div className="flex flex-col gap-2 pt-4 border-t sm:flex-row sm:gap-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50 sm:w-auto"
           >
             {isSubmitting ? 'Menyimpan...' : isEdit ? 'Perbarui lowongan' : 'Buat lowongan'}
           </button>
           <button
             type="button"
             onClick={() => router.push('/dashboard')}
-            className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+            className="w-full rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 sm:w-auto"
           >
             Batal
           </button>

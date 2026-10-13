@@ -20,9 +20,9 @@ export default function DashboardPage() {
   const meta = data?.meta
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
       {/* Sidebar */}
-      <aside className="w-52 shrink-0">
+      <aside className="w-full shrink-0 sm:w-52">
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <h2 className="mb-4 text-lg font-bold">Jobs</h2>
           <ul className="space-y-1">
@@ -40,11 +40,11 @@ export default function DashboardPage() {
 
       {/* Main content */}
       <div className="flex-1">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold">Lowongan Saya</h1>
           <a
             href="/dashboard/jobs/create"
-            className="inline-flex items-center gap-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="inline-flex items-center justify-center gap-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 sm:justify-start"
           >
             + Buat lowongan
           </a>

@@ -28,19 +28,23 @@ export default function RootLayout({
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-gray-50">
         <Providers>
-          <header className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-2 text-xl font-bold">
+          <header className="flex items-center justify-between bg-gray-900 px-4 py-4 text-white sm:px-6">
+            <div className="flex items-center gap-2 text-lg font-bold sm:text-xl">
               <span>Gawe</span>
             </div>
-            <nav className="space-x-4">
-              <a href="/" className="hover:text-gray-300">Lowongan Kerja</a>
-              <a href="/dashboard" className="hover:text-gray-300">Dashboard</a>
+            <nav className="space-x-3 sm:space-x-4">
+              <a href="/" className="text-sm hover:text-gray-300 sm:text-base">
+                Lowongan Kerja
+              </a>
+              <a href="/dashboard" className="text-sm hover:text-gray-300 sm:text-base">
+                Dashboard
+              </a>
             </nav>
           </header>
-          <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
+          <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:py-8">
             {children}
           </main>
-          <footer className="bg-gray-100 py-4 text-center text-gray-600">
+          <footer className="bg-gray-100 px-4 py-4 text-center text-gray-600">
             © Gawe - 2027
           </footer>
         </Providers>

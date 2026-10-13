@@ -64,9 +64,12 @@ test.describe('Dicoding Jobs E2E', () => {
     // Judul pada heading detail sama dengan judul pada kartu
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
-    // Deskripsi dirender sebagai HTML (elemen <p> / <h2> / <li> dalam konten detail)
-    const descCount = await page.locator('article p, article h2, article li').count()
+    // Deskripsi dirender sebagai HTML, bukan teks mentah berisi tag (elemen <h2>/<p>/<li> dalam konten detail)
+    const descCount = await page.locator('article .job-description h2, article .job-description p, article .job-description li').count()
     expect(descCount).toBeGreaterThan(0)
+
+    // Tag HTML mentah tidak boleh muncul sebagai teks
+    await expect(page.locator('.job-description')).not.toContainText('&lt;h2&gt;')
   })
 
   test('user can create a new vacancy from dashboard', async ({ page }) => {

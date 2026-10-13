@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createVacancy, updateVacancy, ApiValidationError, type VacancyPayload } from '@/lib/api'
 import type { Vacancy } from '@/lib/api'
+import { useToast } from '@/components/Toast'
 import SimpleWysiwyg from 'react-simple-wysiwyg'
 
 const POSITIONS = ['Engineering', 'Mobile', 'Fullstack', 'Frontend', 'Backend', 'Product', 'QA']
@@ -62,6 +63,7 @@ function toFormState(vacancy?: Vacancy): FormState {
 
 export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const [isSubmitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState<FormState>(() => toFormState(vacancy))
@@ -85,8 +87,10 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
 
       if (vacancy) {
         await updateVacancy(vacancy.id, payload)
+        addToast('success', `Lowongan "${payload.title}" berhasil diperbarui.`)
       } else {
         await createVacancy(payload)
+        addToast('success', `Lowongan "${payload.title}" berhasil dibuat.`)
       }
 
       router.push('/dashboard')

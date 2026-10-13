@@ -92,8 +92,27 @@ function toFormData(payload: VacancyPayload): FormData {
   return fd
 }
 
-export async function fetchVacancies(search?: string): Promise<Vacancy[]> {
-  const query = search ? `?search=${encodeURIComponent(search)}` : ''
+export type VacancyFilters = {
+  search?: string
+  job_type?: string
+  location?: string
+  position?: string
+}
+
+function toQueryString(filters: VacancyFilters): string {
+  const params = new URLSearchParams()
+
+  if (filters.search) params.set('search', filters.search)
+  if (filters.job_type) params.set('job_type', filters.job_type)
+  if (filters.location) params.set('location', filters.location)
+  if (filters.position) params.set('position', filters.position)
+
+  const qs = params.toString()
+  return qs ? `?${qs}` : ''
+}
+
+export async function fetchVacancies(filters: VacancyFilters = {}): Promise<Vacancy[]> {
+  const query = toQueryString(filters)
   const response = await fetch(`${API_URL}/api/vacancies${query}`)
 
   const body = await handleResponse<{ data: Vacancy[] }>(response)

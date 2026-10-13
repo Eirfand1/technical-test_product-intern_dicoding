@@ -101,6 +101,9 @@ test.describe('Dicoding Jobs E2E', () => {
 
     // Lowongan baru muncul di dashboard
     await expect(page.getByText('QA Automation Engineer').first()).toBeVisible()
+
+    // Notifikasi sukses muncul
+    await expect(page.getByText(/berhasil dibuat/)).toBeVisible()
   })
 
   test('user can delete a vacancy from dashboard', async ({ page }) => {
@@ -137,26 +140,40 @@ test.describe('Dicoding Jobs E2E', () => {
       .first()
       .click()
 
-    // Lowongan hilang dari daftar (auto-retry assertion)
-    await expect(page.getByText(uniqueTitle)).not.toBeVisible()
+    // Lowongan hilang dari daftar (pakai locator h3 untuk tidak menangkap toast)
+    const cardLocators = page.locator('h3', { hasText: uniqueTitle })
+    await expect(cardLocators).not.toBeVisible()
+
+    // Notifikasi sukses muncul
+    await expect(page.getByText(/berhasil dihapus/)).toBeVisible()
   })
 
-  test('user can edit a vacancy from dashboard', async ({ page }) => {
-    await page.goto('/dashboard')
+  test('user can edit a vacancy from dashboard', async ({ page, request }) => {
+    const title = `Edit Me ${Date.now()}`
+    const res = await request.post(`http://localhost:8000/api/vacancies`, {
+      data: {
+        title, position: 'QA', job_type: 'full_time', candidates_needed: 1,
+        active_until: '2030-01-01', location: 'Jakarta', is_remote: false,
+        description: '<p>To be edited</p>', salary_min: 10000000,
+        show_salary: false, min_experience: 'lt_1',
+        company_name: 'Dicoding Indonesia',
+      },
+    })
+    expect(res.ok()).toBeTruthy()
+    const { data } = await res.json()
 
-    // Klik Edit pada lowongan pertama (dari seeder)
-    await page.getByRole('button', { name: 'Edit' }).first().click()
-    await expect(page).toHaveURL(/\/dashboard\/jobs\/\d+\/edit/)
+    await page.goto(`/dashboard/jobs/${data.id}/edit`)
 
-    // Form terisi dengan data lama
     const titleInput = page.getByPlaceholder('Masukkan judul lowongan')
-    await expect(titleInput).not.toBeEmpty()
+    await expect(titleInput).toHaveValue(title) // tunggu form terisi dari API
 
-    // Ubah judul
-    await titleInput.fill('Android Developer (Senior)')
+    await titleInput.fill('Edited Unique Vacancy')
     await page.getByRole('button', { name: 'Perbarui lowongan' }).click()
 
-    await expect(page).toHaveURL(/\/dashboard/)
-    await expect(page.getByText('Android Developer (Senior)').first()).toBeVisible()
+    await expect(page).toHaveURL(/\/dashboard$/)
+    await expect(page.getByText('Edited Unique Vacancy')).toBeVisible()
+    await expect(page.getByText(/berhasil diperbarui/)).toBeVisible()
+
+    await request.delete(`http://localhost:8000/api/vacancies/${data.id}`) // cleanup
   })
 })

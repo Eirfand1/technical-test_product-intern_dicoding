@@ -6,10 +6,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Briefcase } from 'lucide-react'
 import { deleteVacancy } from '@/lib/api'
 import type { Vacancy } from '@/lib/api'
+import { useToast } from '@/components/Toast'
 
 export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { addToast } = useToast()
   const [deleting, setDeleting] = useState(false)
   const [logoError, setLogoError] = useState(false)
 
@@ -23,8 +25,9 @@ export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) 
       await deleteVacancy(vacancy.id)
       // Invalidasi query vacancies di queryClient, lalu load ulang
       await queryClient.invalidateQueries({ queryKey: ['vacancies', 'dashboard'] })
+      addToast('success', `Lowongan "${vacancy.title}" berhasil dihapus.`)
     } catch (e) {
-      alert('Gagal menghapus lowongan')
+      addToast('error', 'Gagal menghapus lowongan. Coba lagi.')
     } finally {
       setDeleting(false)
     }
@@ -33,7 +36,7 @@ export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) 
   const showLogo = vacancy.company_logo && !logoError
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white flex items-start gap-4 shadow-sm">
+    <div className="border border-gray-200 rounded-lg p-4 bg-white flex items-start gap-4">
       {/* Logo perusahaan - fallback ke icon Briefcase jika tidak ada */}
       {showLogo ? (
         <img
@@ -60,10 +63,19 @@ export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) 
 
       <div className="text-right text-sm">
         <p className="text-gray-500">
-          Dibuat: {new Date(vacancy.created_at!).toLocaleDateString('id-ID')}
+          Dibuat: {new Date(vacancy.created_at!).toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          })}
         </p>
         <p className="text-gray-500">
-          Aktif hingga: {new Date(vacancy.active_until!).toLocaleDateString('id-ID')}
+          Aktif hingga: {new Date(vacancy.active_until!).toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          }
+          )}
         </p>
       </div>
 

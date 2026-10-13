@@ -20,6 +20,15 @@ class VacancyController extends Controller
             ->when($request->query('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%");
             })
+            ->when($request->query('job_type'), function ($query, $jobType) {
+                $query->where('job_type', $jobType);
+            })
+            ->when($request->query('location'), function ($query, $location) {
+                $query->where('location', $location);
+            })
+            ->when($request->query('position'), function ($query, $position) {
+                $query->where('position', $position);
+            })
             ->latest()
             ->get();
 

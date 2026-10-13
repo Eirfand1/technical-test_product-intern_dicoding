@@ -1,13 +1,13 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchVacancies } from '@/lib/api'
+import { fetchVacancies, type VacancyFilters } from '@/lib/api'
 import JobCard from '@/components/JobCard'
 
-export default function VacancyList({ search }: { search?: string }) {
+export default function VacancyList({ filters }: { filters: VacancyFilters }) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['vacancies', search],
-    queryFn: () => fetchVacancies(search),
+    queryKey: ['vacancies', filters.search, filters.job_type, filters.location, filters.position],
+    queryFn: () => fetchVacancies(filters),
     enabled: true,
   })
 
@@ -30,9 +30,7 @@ export default function VacancyList({ search }: { search?: string }) {
       {vacancies.length === 0 ? (
         <p>Tidak ada lowongan yang ditemukan.</p>
       ) : (
-        vacancies.map((vacancy) => (
-          <JobCard key={vacancy.id} vacancy={vacancy} />
-        ))
+        vacancies.map((vacancy) => <JobCard key={vacancy.id} vacancy={vacancy} />)
       )}
     </div>
   )

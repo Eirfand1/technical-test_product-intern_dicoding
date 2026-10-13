@@ -41,7 +41,7 @@ export default function RootLayout({
             {children}
           </main>
           <footer className="bg-gray-100 py-4 text-center text-gray-600">
-            Gawe • dicoding.com • Jl. Prof. Dr. Satrya Wijaya No. 12, Jakarta
+            © Gawe - 2027
           </footer>
         </Providers>
       </body>

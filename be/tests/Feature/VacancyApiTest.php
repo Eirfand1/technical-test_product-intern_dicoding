@@ -231,6 +231,51 @@ test('GET /api/vacancies?search= returns an empty collection when no match', fun
     $response->assertOk()->assertJson(['data' => []]);
 });
 
+test('GET /api/vacancies?job_type= filters by job type', function () {
+    Vacancy::factory()->create(['title' => 'A', 'job_type' => 'full_time']);
+    Vacancy::factory()->create(['title' => 'B', 'job_type' => 'part_time']);
+    Vacancy::factory()->create(['title' => 'C', 'job_type' => 'full_time']);
+
+    $response = $this->getJson('/api/vacancies?job_type=full_time');
+
+    $response->assertOk()->assertJsonCount(2, 'data');
+    $titles = array_column($response->json('data'), 'title');
+    sort($titles);
+    expect($titles)->toBe(['A', 'C']);
+});
+
+test('GET /api/vacancies?location= filters by location', function () {
+    Vacancy::factory()->create(['title' => 'A', 'location' => 'Bandung']);
+    Vacancy::factory()->create(['title' => 'B', 'location' => 'Jakarta']);
+    Vacancy::factory()->create(['title' => 'C', 'location' => 'Bandung']);
+
+    $response = $this->getJson('/api/vacancies?location=Jakarta');
+
+    $response->assertOk()->assertJsonCount(1, 'data');
+    expect($response->json('data.0.title'))->toBe('B');
+});
+
+test('GET /api/vacancies?position= filters by position', function () {
+    Vacancy::factory()->create(['title' => 'A', 'position' => 'Mobile']);
+    Vacancy::factory()->create(['title' => 'B', 'position' => 'QA']);
+    Vacancy::factory()->create(['title' => 'C', 'position' => 'Mobile']);
+
+    $response = $this->getJson('/api/vacancies?position=Mobile');
+
+    $response->assertOk()->assertJsonCount(2, 'data');
+});
+
+test('GET /api/vacancies can combine search and filters', function () {
+    Vacancy::factory()->create(['title' => 'Android Developer', 'job_type' => 'full_time', 'location' => 'Bandung']);
+    Vacancy::factory()->create(['title' => 'Android Designer', 'job_type' => 'part_time', 'location' => 'Jakarta']);
+    Vacancy::factory()->create(['title' => 'iOS Developer', 'job_type' => 'full_time', 'location' => 'Jakarta']);
+
+    $response = $this->getJson('/api/vacancies?search=Developer&job_type=full_time&location=Bandung');
+
+    $response->assertOk()->assertJsonCount(1, 'data');
+    expect($response->json('data.0.title'))->toBe('Android Developer');
+});
+
 test('PUT /api/vacancies/{id} updates a vacancy with valid data', function () {
     $vacancy = Vacancy::factory()->create([
         'title' => 'Old Title',

@@ -14,13 +14,13 @@ export default function DashboardPage() {
     <div className="flex gap-6">
       {/* Sidebar */}
       <aside className="w-52 shrink-0">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
           <h2 className="font-bold text-lg mb-4">Jobs</h2>
           <ul className="space-y-1">
             <li>
               <a
                 href="/dashboard"
-                className="block px-3 py-2 rounded text-blue-600 bg-blue-50 font-medium"
+                className="block px-3 py-2 rounded  bg-blue-50 font-medium"
               >
                 Lowongan Saya
               </a>

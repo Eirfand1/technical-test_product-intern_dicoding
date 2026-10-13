@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreVacancyRequest;
 use App\Http\Resources\VacancyResource;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
@@ -22,6 +23,18 @@ class VacancyController extends Controller
             ->get();
 
         return VacancyResource::collection($vacancies);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreVacancyRequest $request)
+    {
+        $vacancy = Vacancy::create($request->validated());
+
+        return (new VacancyResource($vacancy))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**

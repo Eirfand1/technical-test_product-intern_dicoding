@@ -20,9 +20,6 @@ class VacancySeeder extends Seeder
             'location' => 'Bandung',
             'is_remote' => false,
             'company_name' => 'Dicoding Indonesia',
-            'company_logo' => 'https://dicoding.com/logo.svg',
-            'company_sector' => 'Technology',
-            'company_size' => '50-100 Karyawan',
         ];
 
         Vacancy::factory()->create([

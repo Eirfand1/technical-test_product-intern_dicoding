@@ -27,5 +27,5 @@ test('model fillable includes all required fields', function () {
     $vacancy = new Vacancy;
     $fillable = $vacancy->getFillable();
 
-    expect($fillable)->toContain('title', 'position', 'job_type', 'candidates_needed', 'active_until', 'location', 'is_remote', 'description', 'salary_min', 'salary_max', 'show_salary', 'min_experience', 'company_name', 'company_sector', 'company_size');
+    expect($fillable)->toContain('title', 'position', 'job_type', 'candidates_needed', 'active_until', 'location', 'is_remote', 'description', 'salary_min', 'salary_max', 'show_salary', 'min_experience', 'company_name', 'company_logo');
 });

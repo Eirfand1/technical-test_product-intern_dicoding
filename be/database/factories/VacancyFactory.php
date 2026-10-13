@@ -31,9 +31,6 @@ class VacancyFactory extends Factory
             'show_salary' => false,
             'min_experience' => fake()->randomElement(Vacancy::MIN_EXPERIENCES),
             'company_name' => 'Dicoding Indonesia',
-            'company_logo' => 'https://dicoding.com/logo.svg',
-            'company_sector' => 'Technology',
-            'company_size' => '50-100 Karyawan',
         ];
     }
 }

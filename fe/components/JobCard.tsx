@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Briefcase } from 'lucide-react'
 import Link from 'next/link'
 import type { Vacancy } from '@/lib/api'
 
@@ -33,33 +36,41 @@ function formatDate(value: string | null): string {
 export default function JobCard({ vacancy }: { vacancy: Vacancy }) {
   const experience = experienceLabels[vacancy.min_experience] ?? vacancy.min_experience
   const jobType = jobTypeLabels[vacancy.job_type] ?? vacancy.job_type
+  const [logoError, setLogoError] = useState(false)
+
+  const showLogo = vacancy.company_logo && !logoError
 
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
-      className="block rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
+      className="block w-full max-w-3xl rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
     >
       <div className="flex items-start gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-navy-800 text-sm text-white">
-          Logo
-        </div>
+        {/* Logo perusahaan - fallback ke icon Briefcase jika tidak ada */}
+        {showLogo ? (
+          <img
+            src={vacancy.company_logo!}
+            alt={`${vacancy.company_name} logo`}
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg object-contain"
+            onError={() => setLogoError(true)}
+          />
+        ) : (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+            <Briefcase className="h-8 w-8 text-gray-600" />
+          </div>
+        )}
 
         <div className="flex-1">
           <h2 className="text-lg font-bold text-gray-900">{vacancy.title}</h2>
           <p className="mt-1 flex items-center gap-2 text-sm text-gray-600">
-            <span aria-hidden="true">&#127970;</span>
             {vacancy.company_name}
             <span className="ml-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
               {jobType}
             </span>
           </p>
           <p className="mt-1 flex items-center gap-4 text-sm text-gray-500">
-            <span>
-              <span aria-hidden="true">&#128205;</span> {vacancy.location}
-            </span>
-            <span>
-              <span aria-hidden="true">&#128188;</span> {experience}
-            </span>
+            <span>{vacancy.location}</span>
+            <span>{experience}</span>
           </p>
         </div>
 

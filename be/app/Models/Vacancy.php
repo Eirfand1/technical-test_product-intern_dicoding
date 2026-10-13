@@ -22,8 +22,6 @@ use Illuminate\Database\Eloquent\Model;
     'min_experience',
     'company_name',
     'company_logo',
-    'company_sector',
-    'company_size',
 ])]
 class Vacancy extends Model
 {

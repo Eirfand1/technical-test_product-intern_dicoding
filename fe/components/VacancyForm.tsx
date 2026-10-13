@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createVacancy, updateVacancy, ApiValidationError, type VacancyPayload } from '@/lib/api'
 import type { Vacancy } from '@/lib/api'
+import SimpleWysiwyg from 'react-simple-wysiwyg'
 
 const POSITIONS = ['Engineering', 'Mobile', 'Fullstack', 'Frontend', 'Backend', 'Product', 'QA']
 const LOCATIONS = ['Bandung', 'Jakarta', 'Yogyakarta', 'Remote', 'Surabaya', 'Bali']
@@ -35,8 +36,7 @@ type FormState = {
   show_salary: boolean
   min_experience: string
   company_name: string
-  company_sector: string
-  company_size: string
+  company_logo: File | null
 }
 
 function toFormState(vacancy?: Vacancy): FormState {
@@ -56,8 +56,7 @@ function toFormState(vacancy?: Vacancy): FormState {
     show_salary: vacancy?.show_salary ?? false,
     min_experience: vacancy?.min_experience ?? '1_3',
     company_name: vacancy?.company_name ?? 'Dicoding Indonesia',
-    company_sector: vacancy?.company_sector ?? 'Technology',
-    company_size: vacancy?.company_size ?? '50-100 Karyawan',
+    company_logo: null,
   }
 }
 
@@ -98,6 +97,8 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
           flat[key] = msgs[0]
         }
         setErrors(flat)
+      } else {
+        console.error('Submit failed:', err)
       }
     } finally {
       setSubmitting(false)
@@ -204,16 +205,15 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
 
         <div>
           <label className="block font-medium">Deskripsi</label>
-          <textarea
+          <SimpleWysiwyg
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
-            placeholder="Masukkan deskripsi pekerjaan (HTML didukung)"
-            rows={6}
+            placeholder="Masukkan deskripsi pekerjaan"
             className={`w-full rounded border px-3 py-2 ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
           />
           {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
           <p className="text-xs text-gray-500 mt-1">
-            Tag HTML yang didukung: h2, p, ul, li, a, br
+            Format teks: tebal, miring, garis bawah, daftar, tautan
           </p>
         </div>
 
@@ -276,21 +276,31 @@ export default function VacancyForm({ vacancy }: { vacancy?: Vacancy }) {
             type="text"
             value={formData.company_name}
             onChange={(e) => handleChange('company_name', e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2"
-            readOnly
-          />
-          <input
-            type="text"
-            value={formData.company_sector}
-            onChange={(e) => handleChange('company_sector', e.target.value)}
+            placeholder="Nama perusahaan"
             className="w-full rounded border border-gray-300 px-3 py-2"
           />
-          <input
-            type="text"
-            value={formData.company_size}
-            onChange={(e) => handleChange('company_size', e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2"
-          />
+          <div>
+            <label className="block font-medium text-sm">Logo perusahaan (opsional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleChange('company_logo', e.target.files?.[0] ?? null)}
+              className="w-full text-sm rounded border border-gray-300 p-2"
+            />
+            {vacancy?.company_logo && (
+              <p className="text-xs text-gray-500 mt-1">
+                Logo saat ini:{' '}
+                <a
+                  href={vacancy.company_logo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-blue-600"
+                >
+                  lihat
+                </a>
+              </p>
+            )}
+          </div>
         </fieldset>
 
         <div className="flex gap-4 pt-4 border-t">

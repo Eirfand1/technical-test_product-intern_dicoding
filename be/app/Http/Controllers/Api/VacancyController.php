@@ -7,6 +7,7 @@ use App\Http\Requests\StoreVacancyRequest;
 use App\Http\Resources\VacancyResource;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VacancyController extends Controller
 {
@@ -30,7 +31,14 @@ class VacancyController extends Controller
      */
     public function store(StoreVacancyRequest $request)
     {
-        $vacancy = Vacancy::create($request->validated());
+        $validated = $request->validated();
+        $logo = $this->storeLogo($request);
+
+        if ($logo !== null) {
+            $validated['company_logo'] = $logo;
+        }
+
+        $vacancy = Vacancy::create($validated);
 
         return (new VacancyResource($vacancy))
             ->response()
@@ -40,7 +48,7 @@ class VacancyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Vacancy      $vacancy)
+    public function show(Vacancy $vacancy)
     {
         return new VacancyResource($vacancy);
     }
@@ -50,7 +58,15 @@ class VacancyController extends Controller
      */
     public function update(StoreVacancyRequest $request, Vacancy $vacancy)
     {
-        $vacancy->update($request->validated());
+        $validated = $request->validated();
+
+        $logo = $this->storeLogo($request);
+
+        if ($logo !== null) {
+            $validated['company_logo'] = $logo;
+        }
+
+        $vacancy->update($validated);
 
         return new VacancyResource($vacancy);
     }
@@ -63,5 +79,17 @@ class VacancyController extends Controller
         $vacancy->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Store the uploaded company logo and return its public path, or null if no file was provided.
+     */
+    private function storeLogo(Request $request): ?string
+    {
+        if (! $request->hasFile('company_logo')) {
+            return null;
+        }
+
+        return $request->file('company_logo')->store('company-logos', 'public');
     }
 }

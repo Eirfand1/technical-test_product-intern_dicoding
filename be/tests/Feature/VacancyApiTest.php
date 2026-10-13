@@ -26,8 +26,7 @@ test('GET /api/vacancies returns a collection of vacancies', function () {
                 'show_salary',
                 'min_experience',
                 'company_name',
-                'company_sector',
-                'company_size',
+                'company_logo',
                 'created_at',
             ]],
         ]);
@@ -97,7 +96,7 @@ test('POST /api/vacancies creates a vacancy with valid data', function () {
 
     $response
         ->assertCreated()
-        ->assertJsonStructure(['data' => ['id', 'title', 'job_type', 'company_name', 'company_sector', 'company_size']])
+        ->assertJsonStructure(['data' => ['id', 'title', 'job_type', 'company_name', 'company_logo']])
         ->assertJsonPath('data.title', 'Senior Backend Engineer')
         ->assertJsonPath('data.job_type', 'full_time')
         ->assertJsonPath('data.company_name', 'Acme Corp');
@@ -241,8 +240,6 @@ test('PUT /api/vacancies/{id} updates a vacancy with valid data', function () {
     $payload = validPayload([
         'title' => 'Updated Title',
         'company_name' => 'Updated Corp',
-        'company_sector' => 'Finance',
-        'company_size' => '100-500 Karyawan',
     ]);
 
     $response = $this->putJson("/api/vacancies/{$vacancy->id}", $payload);
@@ -256,8 +253,6 @@ test('PUT /api/vacancies/{id} updates a vacancy with valid data', function () {
         'id' => $vacancy->id,
         'title' => 'Updated Title',
         'company_name' => 'Updated Corp',
-        'company_sector' => 'Finance',
-        'company_size' => '100-500 Karyawan',
     ]);
 });
 
@@ -300,7 +295,5 @@ function validPayload(array $overrides = []): array
         'show_salary' => true,
         'min_experience' => '1_3',
         'company_name' => 'Acme Corp',
-        'company_sector' => 'Technology',
-        'company_size' => '50-100 Karyawan',
     ], $overrides);
 }

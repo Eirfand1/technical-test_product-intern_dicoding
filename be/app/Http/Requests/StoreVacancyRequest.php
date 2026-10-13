@@ -36,9 +36,8 @@ class StoreVacancyRequest extends FormRequest
             'salary_max' => ['nullable', 'integer', 'gte:salary_min'],
             'show_salary' => ['sometimes', 'boolean'],
             'min_experience' => ['required', 'string', 'in:'.implode(',', Vacancy::MIN_EXPERIENCES)],
-            'company_name' => ['required', 'string', 'max:100'],
-            'company_sector' => ['required', 'string', 'max:50'],
-            'company_size' => ['required', 'string', 'max:50'],
+    'company_name' => ['required', 'string', 'max:100'],
+    'company_logo' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

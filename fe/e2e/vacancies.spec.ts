@@ -64,8 +64,9 @@ test.describe('Dicoding Jobs E2E', () => {
     // Judul pada heading detail sama dengan judul pada kartu
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
-    // Deskripsi HTML dirender (bukan teks mentah berisi tag)
-    await expect(page.locator('h2').first()).toBeVisible()
+    // Deskripsi dirender sebagai HTML (elemen <p> / <h2> / <li> dalam konten detail)
+    const descCount = await page.locator('article p, article h2, article li').count()
+    expect(descCount).toBeGreaterThan(0)
   })
 
   test('user can create a new vacancy from dashboard', async ({ page }) => {
@@ -89,15 +90,16 @@ test.describe('Dicoding Jobs E2E', () => {
       .split('T')[0]
     await page.locator('input[type="date"]').fill(future)
     await page.getByRole('combobox').nth(1).selectOption('Jakarta')
-    await page.getByPlaceholder('Masukkan deskripsi pekerjaan (HTML didukung)')
-      .fill('<h2>Job Description</h2><p>QA automation</p>')
+    await page.locator('.rsw-ce').first().fill('<h2>Job Description</h2><p>QA automation</p>')
     await page.getByPlaceholder('Rp Minimum').fill('12000000')
     await page.getByRole('radio', { name: '1-3 tahun' }).check()
 
     await page.getByRole('button', { name: 'Buat lowongan' }).click()
 
-    // Redirect ke dashboard dan lowongan baru muncul (gunakan .first() karena bisa ada duplikat dari run sebelumnya)
-    await expect(page).toHaveURL(/\/dashboard/)
+    // Redirect ke dashboard root (bukan /dashboard/jobs/create)
+    await page.waitForURL('http://localhost:3000/dashboard')
+
+    // Lowongan baru muncul di dashboard
     await expect(page.getByText('QA Automation Engineer').first()).toBeVisible()
   })
 
@@ -117,8 +119,7 @@ test.describe('Dicoding Jobs E2E', () => {
       .split('T')[0]
     await page.locator('input[type="date"]').fill(future)
     await page.getByRole('combobox').nth(1).selectOption('Jakarta')
-    await page.getByPlaceholder('Masukkan deskripsi pekerjaan (HTML didukung)')
-      .fill('<p>Temporary</p>')
+    await page.locator('.rsw-ce').first().fill('<p>Temporary</p>')
     await page.getByPlaceholder('Rp Minimum').fill('10000000')
     await page.getByRole('radio', { name: 'Kurang dari 1 tahun' }).check()
 

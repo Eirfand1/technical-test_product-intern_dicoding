@@ -15,8 +15,7 @@ export type Vacancy = {
   show_salary: boolean
   min_experience: string
   company_name: string
-  company_sector: string
-  company_size: string
+  company_logo: string | null
   created_at: string | null
 }
 
@@ -34,8 +33,7 @@ export type VacancyPayload = {
   show_salary?: boolean
   min_experience: string
   company_name: string
-  company_sector: string
-  company_size: string
+  company_logo?: File | null
 }
 
 export class ApiValidationError extends Error {
@@ -67,6 +65,33 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
+function toFormData(payload: VacancyPayload): FormData {
+  const fd = new FormData()
+  fd.append('title', payload.title)
+  fd.append('position', payload.position)
+  fd.append('job_type', payload.job_type)
+  fd.append('candidates_needed', String(payload.candidates_needed))
+  fd.append('active_until', payload.active_until)
+  fd.append('location', payload.location)
+  if (payload.is_remote !== undefined) {
+    fd.append('is_remote', payload.is_remote ? '1' : '0')
+  }
+  fd.append('description', payload.description)
+  fd.append('salary_min', String(payload.salary_min))
+  if (payload.salary_max !== null && payload.salary_max !== undefined) {
+    fd.append('salary_max', String(payload.salary_max))
+  }
+  if (payload.show_salary !== undefined) {
+    fd.append('show_salary', payload.show_salary ? '1' : '0')
+  }
+  fd.append('min_experience', payload.min_experience)
+  fd.append('company_name', payload.company_name)
+  if (payload.company_logo) {
+    fd.append('company_logo', payload.company_logo)
+  }
+  return fd
+}
+
 export async function fetchVacancies(search?: string): Promise<Vacancy[]> {
   const query = search ? `?search=${encodeURIComponent(search)}` : ''
   const response = await fetch(`${API_URL}/api/vacancies${query}`)
@@ -87,8 +112,7 @@ export async function fetchVacancy(id: number | string): Promise<Vacancy> {
 export async function createVacancy(payload: VacancyPayload): Promise<Vacancy> {
   const response = await fetch(`${API_URL}/api/vacancies`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: toFormData(payload),
   })
 
   const body = await handleResponse<{ data: Vacancy }>(response)
@@ -99,8 +123,7 @@ export async function createVacancy(payload: VacancyPayload): Promise<Vacancy> {
 export async function updateVacancy(id: number | string, payload: VacancyPayload): Promise<Vacancy> {
   const response = await fetch(`${API_URL}/api/vacancies/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: toFormData(payload),
   })
 
   const body = await handleResponse<{ data: Vacancy }>(response)

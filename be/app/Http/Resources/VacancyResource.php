@@ -14,6 +14,10 @@ class VacancyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $logo = $this->company_logo
+            ? url('storage/'.$this->company_logo)
+            : null;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -29,8 +33,7 @@ class VacancyResource extends JsonResource
             'show_salary' => $this->show_salary,
             'min_experience' => $this->min_experience,
             'company_name' => $this->company_name,
-            'company_sector' => $this->company_sector,
-            'company_size' => $this->company_size,
+            'company_logo' => $logo,
             'created_at' => $this->created_at?->toDateTimeString(),
         ];
     }

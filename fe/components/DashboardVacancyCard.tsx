@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
+import { Briefcase } from 'lucide-react'
 import { deleteVacancy } from '@/lib/api'
 import type { Vacancy } from '@/lib/api'
 
@@ -10,6 +11,7 @@ export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) 
   const router = useRouter()
   const queryClient = useQueryClient()
   const [deleting, setDeleting] = useState(false)
+  const [logoError, setLogoError] = useState(false)
 
   async function handleDelete() {
     if (!confirm('Yakin ingin menghapus lowongan ini?')) {
@@ -28,12 +30,23 @@ export default function DashboardVacancyCard({ vacancy }: { vacancy: Vacancy }) 
     }
   }
 
+  const showLogo = vacancy.company_logo && !logoError
+
   return (
-    <div className="border rounded-lg p-4 bg-white flex items-start gap-4 shadow-sm">
-      {/* Logo placeholder */}
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-navy-800 text-xs text-white">
-        Logo
-      </div>
+    <div className="border border-gray-200 rounded-lg p-4 bg-white flex items-start gap-4 shadow-sm">
+      {/* Logo perusahaan - fallback ke icon Briefcase jika tidak ada */}
+      {showLogo ? (
+        <img
+          src={vacancy.company_logo!}
+          alt={`${vacancy.company_name} logo`}
+          className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-gray-100 object-contain"
+          onError={() => setLogoError(true)}
+        />
+      ) : (
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-gray-100">
+          <Briefcase className="h-8 w-8 text-gray-600" />
+        </div>
+      )}
 
       <div className="flex-1">
         <a href={`/jobs/${vacancy.id}`}>
